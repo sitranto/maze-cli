@@ -2,55 +2,58 @@ namespace Maze;
 
 public class GameCore
 {
-    private readonly Map map;
-    private (int, int) playerPosition = (1, 0);
+    private Map? map;
+    private (int, int) playerPosition;
     private (int, int) exitPosition;
-
-    public int Width { get; set; } = 6;
-    public int Height { get; set; } = 6;
-
-    public GameCore()
-    {
-        map = new Map()
-        {
-            GridWidth = Width * 2 + 1,
-            GridHeight = Height * 2 + 1
-        };
-    }
 
     public void MainMenu()
     {
-        Console.Write("Welcome to the Maze Game CLI!\nChoose an option:\n");
-        Console.WriteLine("1. Start the game");
-        Console.WriteLine("2. Open settings");
-        Console.WriteLine("3. Exit");
-        var pressed = Console.ReadKey();
-        Console.Clear();
-        switch (pressed.Key)
+        while (true)
         {
-            case ConsoleKey.D1:
+            Greetings();
+            var pressed = Console.ReadKey();
+            switch (pressed.Key)
             {
-                Start();
-                break;
+                case ConsoleKey.D1:
+                {
+                    Start();
+                    break;
+                }
+                case ConsoleKey.D2:
+                {
+                    OpenSettings();
+                    break;
+                }
+                case ConsoleKey.D3:
+                {
+                    return;
+                }
             }
-            case ConsoleKey.D2:
-            {
-                break;
-            }
-            case ConsoleKey.D3:
-            {
-                return;
-            }
+            Console.Clear();
         }
     }
 
     private void Start()
     {
+        Console.Clear();
+        map = new()
+        {
+            GridWidth = Settings.Width * 2 + 1,
+            GridHeight = Settings.Height * 2 + 1
+        };
         map.GenerateBinaryMaze();
         SetPlayer();
         SetExit();
         map.Print();
         Game();
+    }
+
+    private void Greetings()
+    {
+        Console.Write("Welcome to the Maze Game CLI!\nChoose an option:\n");
+        Console.WriteLine("1. Start the game");
+        Console.WriteLine("2. Open settings");
+        Console.WriteLine("3. Exit");
     }
 
     private void Game()
@@ -59,7 +62,7 @@ public class GameCore
         {
             var pressed = Console.ReadKey();
 
-            map.Grid![playerPosition.Item1, playerPosition.Item2] = ' ';
+            map!.Grid![playerPosition.Item1, playerPosition.Item2] = ' ';
 
             switch (pressed.Key)
             {
@@ -110,21 +113,76 @@ public class GameCore
         }
     }
 
+    private void OpenSettings()
+    {
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("Settings:");
+            Console.WriteLine("1. Maze width: " + Settings.Width);
+            Console.WriteLine("2. Maze height: " + Settings.Height);
+            Console.WriteLine("3. Exit");
+
+            var pressed = Console.ReadKey();
+
+            switch (pressed.Key)
+            {
+                case ConsoleKey.D1:
+                {
+                    while (true)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Enter value from 3 to 15 and press ENTER: ");
+                        if (!short.TryParse(Console.ReadLine(), out var value) || value is > 15 or < 3)
+                        {
+                            continue;
+                        }
+
+                        Settings.Width = value;
+                        break;
+                    }
+                    break;
+                }
+                case ConsoleKey.D2:
+                {
+                    while (true)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Enter value from 3 to 15 and press ENTER: ");
+                        if (!short.TryParse(Console.ReadLine(), out var value) || value is > 15 or < 3)
+                        {
+                            continue;
+                        }
+
+                        Settings.Height = value;
+                        break;
+                    }
+                    break;
+                }
+                case ConsoleKey.D3:
+                {
+                    return;
+                }
+            }
+        }
+    }
+
     private void SetPlayer()
     {
-        map.Grid![playerPosition.Item1, playerPosition.Item2] = 'P';
+        playerPosition = (1, 0);
+        map!.Grid![playerPosition.Item1, playerPosition.Item2] = 'P';
     }
 
     private void SetExit()
     {
-        exitPosition = (map.GridWidth - 2, map.GridHeight - 1);
+        exitPosition = (map!.GridWidth - 2, map.GridHeight - 1);
         map.Grid![map.GridWidth - 2, map.GridHeight - 1] = 'E';
     }
 
     private void RedrawMap()
     {
         Console.Clear();
-        map.Grid![playerPosition.Item1, playerPosition.Item2] = 'P';
+        map!.Grid![playerPosition.Item1, playerPosition.Item2] = 'P';
         map.Print();
     }
 
